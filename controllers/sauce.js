@@ -28,7 +28,7 @@ exports.deleteSauce = (req, res, next) => {
         }
     })
     .catch( error => {
-        res.status(500).json({ error });
+        res.status(400).json({ error });
     });
 };
 
@@ -58,7 +58,7 @@ exports.createSauce = (req, res, next) => {
 *      -> on recrée le chemin du fichier image
 * 2. sans fichier: on récupère le corps de la requete tel quel
 */
- exports.modifySauce = (req, res, next) => {
+exports.modifySauce = (req, res, next) => {
     const sauceObject = req.file ? {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
