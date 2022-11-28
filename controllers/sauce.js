@@ -17,7 +17,7 @@ exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id})
     .then(sauce => {
         if (sauce.userId != req.auth.userId) {
-            res.status(401).json({message: 'Not authorized'});
+            res.status(403).json({message: 'unauthorized request'});
         } else {
             const filename = sauce.imageUrl.split('/images/')[1];
             fs.unlink(`images/${filename}`, () => {
@@ -58,33 +58,6 @@ exports.createSauce = (req, res, next) => {
 *      -> on recrée le chemin du fichier image
 * 2. sans fichier: on récupère le corps de la requete tel quel
 */
-
-/* version witout deleting existing image */
-/*
-exports.modifySauce = (req, res, next) => {
-    const sauceObject = req.file ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-    } : { ...req.body };
-
-    Sauce.findOne({_id: req.params.id})
-        .then((sauce) => {
-            if (sauce.userId != req.auth.userId) {
-                res.status(401).json({ message : 'Not authorized'});
-            } else {
-                Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
-                .then(() => res.status(200).json({message : 'Objet modifié!'}))
-                .catch(error => res.status(401).json({ error }));
-            }
-        })
-        .catch((error) => {
-            res.status(400).json({ error });
-        });
- };
- */
-
- /* version wit deleting existing image - not working*/
-
  exports.modifySauce = (req, res, next) => {
     const sauceObject = req.file ? {
         ...JSON.parse(req.body.sauce),
@@ -94,7 +67,7 @@ exports.modifySauce = (req, res, next) => {
     Sauce.findOne({_id: req.params.id})
     .then((sauce) => {
         if (sauce.userId != req.auth.userId) {
-            res.status(401).json({ message : 'Not authorized'});
+            res.status(403).json({ message : 'unauthorized request'});
         } else {
             if (req.file){
                 const filename = sauce.imageUrl.split('/images/')[1];
@@ -120,59 +93,59 @@ exports.voteSauce = (req, res, next) => {
     const user = req.body.userId;
     Sauce.findOne({_id: req.params.id})//On sélectionne la sauce par son id
     .then((sauce) => {
-        //Teste le statut du like
-        switch(like) {
-            case 1:// like=1 et tableau usersLiked ne contient pas déjà l'id
-                if(!sauce.usersLiked.includes(user)){
-                    Sauce.updateOne({_id: req.params.id}, {
-                        $inc: {likes: 1},//on ajoute 1 au likes
-                        $push: {usersLiked: user}//et on ajoute l'id de l'utilisateur au tableau usersLiked
-                    }, {_id: req.params.id})
-                    .then(() => res.status(200).json({message: 'Vote positif !'}))
-                    .catch(error => res.status(400).json({error}))
-                }
-                else {
-                    res.status(400).json({message: 'Vote déjà enregistré'})
-                }
-            break;
-            case -1://like= -1 tableau usersDisliked ne contient pas déjà l'id
-                if(!sauce.usersDisliked.includes(user)){
-                    Sauce.updateOne({_id: req.params.id}, {
-                        $inc: {dislikes: 1},//on ajoute 1 à dislikes
-                        $push: {usersDisliked: user}//et on ajoute l'userId au tableau usersDisliked
-                    }, {_id: req.params.id})
-                    .then(() => res.status(200).json({message: 'Vote négatif !'}))
-                    .catch(error => res.status(400).json({error}))
-                }
-                else {
-                    res.status(400).json({message: 'Vote déjà enregistré'})
-                }
-            break;
-            case 0://s'il est égale à 0
-                if (sauce.usersLiked.includes(user)) {//et que usersLiked contient l'userId
-                    Sauce.updateOne({_id: req.params.id}, {
-                        $inc: {likes: -1},//on retire 1 à likes
-                        $pull: {usersLiked: user}//et on sort l'id du tableau usersLiked
-                    }, {_id: req.params.id})
-                    .then(() => res.status(200).json({message: 'Vote réinitialisé !'}))
-                    .catch(error => res.status(400).json({error}))
-                } else if (sauce.usersDisliked.includes(user)) {//et que usersDisliked contient l'userId
-                    Sauce.updateOne({_id: req.params.id}, {
-                        $inc: {dislikes: -1},//on retire 1 à dislikes
-                        $pull: {usersDisliked: user}//et on sort l'id du tableau usersDisliked
-                    } , {_id: req.params.id})
-                    .then(() => res.status(200).json({message: 'avis retiré!'}))
-                    .catch(error => res.status(400).json({error}))
-                }
-            break;
-            default:
-                res.status(400).json({message: 'avis hors {-1,0,1}'})
+        if (sauce.userId != req.auth.userId) {
+            res.status(403).json({ message : 'unauthorized request'});
+        } else {
+            //Teste le statut du like
+            switch(like) {
+                case 1:// like=1 et tableau usersLiked ne contient pas déjà l'id
+                    if(!sauce.usersLiked.includes(user)){
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: {likes: 1},//on ajoute 1 au likes
+                            $push: {usersLiked: user}//et on ajoute l'id de l'utilisateur au tableau usersLiked
+                        }, {_id: req.params.id})
+                        .then(() => res.status(200).json({message: 'Vote positif !'}))
+                        .catch(error => res.status(400).json({error}))
+                    }
+                    else {
+                        res.status(400).json({message: 'Vote déjà enregistré'})
+                    }
+                break;
+                case -1://like= -1 tableau usersDisliked ne contient pas déjà l'id
+                    if(!sauce.usersDisliked.includes(user)){
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: {dislikes: 1},//on ajoute 1 à dislikes
+                            $push: {usersDisliked: user}//et on ajoute l'userId au tableau usersDisliked
+                        }, {_id: req.params.id})
+                        .then(() => res.status(200).json({message: 'Vote négatif !'}))
+                        .catch(error => res.status(400).json({error}))
+                    }
+                    else {
+                        res.status(400).json({message: 'Vote déjà enregistré'})
+                    }
+                break;
+                case 0://s'il est égale à 0
+                    if (sauce.usersLiked.includes(user)) {//et que usersLiked contient l'userId
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: {likes: -1},//on retire 1 à likes
+                            $pull: {usersLiked: user}//et on sort l'id du tableau usersLiked
+                        }, {_id: req.params.id})
+                        .then(() => res.status(200).json({message: 'Vote réinitialisé !'}))
+                        .catch(error => res.status(400).json({error}))
+                    } else if (sauce.usersDisliked.includes(user)) {//et que usersDisliked contient l'userId
+                        Sauce.updateOne({_id: req.params.id}, {
+                            $inc: {dislikes: -1},//on retire 1 à dislikes
+                            $pull: {usersDisliked: user}//et on sort l'id du tableau usersDisliked
+                        } , {_id: req.params.id})
+                        .then(() => res.status(200).json({message: 'avis retiré!'}))
+                        .catch(error => res.status(400).json({error}))
+                    }
+                break;
+                default:
+                    res.status(400).json({message: 'avis hors {-1,0,1}'})
+            }
         }
     })
     .catch(error => res.status(400).json({ error }));
 };
-
-
-
-
 

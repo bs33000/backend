@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 const path = require('path');
-
+const dotenv = require('dotenv').config();//Permet de créer un environnement de variables
 
 app.use(express.json());
 
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 
 
 
-mongoose.connect('mongodb+srv://ben:rEDlUSbGYpj@cluster0.qecuolz.mongodb.net/test?retryWrites=true&w=majority',
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}.mongodb.net/${process.env.DB_DATABASE}?retryWrites=true&w=majority`,
 { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(() => console.log('Connexion à MongoDB échouée !'));
