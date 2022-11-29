@@ -4,13 +4,13 @@ const fs = require('fs');
 exports.getAllSauce = (req, res, next) => {
     Sauce.find()
     .then(sauces => res.status(200).json(sauces))
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(error.statusCode).json({ error }));
 }
 
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
     .then(sauces => res.status(200).json(sauces))
-    .catch(error => res.status(404).json({ error }));
+    .catch(error => res.status(error.statusCode).json({ error }));
 }
 
 exports.deleteSauce = (req, res, next) => {
@@ -23,12 +23,12 @@ exports.deleteSauce = (req, res, next) => {
             fs.unlink(`images/${filename}`, () => {
                 Sauce.deleteOne({_id: req.params.id})
                 .then(() => { res.status(200).json({message: 'Objet supprimé !'})})
-                .catch(error => res.status(401).json({ error }));
+                .catch(error => res.status(error.statusCode).json({ error }));
             });
         }
     })
     .catch( error => {
-        res.status(400).json({ error });
+        res.status(error.statusCode).json({ error });
     });
 };
 
@@ -47,7 +47,7 @@ exports.createSauce = (req, res, next) => {
 
     sauce.save()
     .then(() => { res.status(201).json({message: 'Objet enregistré !'})})
-    .catch(error => { res.status(400).json( { error })})
+    .catch(error => { res.status(error.statusCode).json( { error })})
 };
 
 
@@ -79,11 +79,11 @@ exports.modifySauce = (req, res, next) => {
 
             Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
             .then(() => res.status(200).json({message : 'Objet modifié!'}))
-            .catch(error => res.status(400).json({ error }));
+            .catch(error => res.status(error.statusCode).json({ error }));
         }
     })
     .catch((error) => {
-        res.status(400).json({ error });
+        res.status(error.statusCode).json({ error });
     });
 };
 
@@ -105,7 +105,7 @@ exports.voteSauce = (req, res, next) => {
                             $push: {usersLiked: user}//et on ajoute l'id de l'utilisateur au tableau usersLiked
                         }, {_id: req.params.id})
                         .then(() => res.status(200).json({message: 'Vote positif !'}))
-                        .catch(error => res.status(400).json({error}))
+                        .catch(error => res.status(error.statusCode).json({error}))
                     }
                     else {
                         res.status(400).json({message: 'Vote déjà enregistré'})
@@ -118,7 +118,7 @@ exports.voteSauce = (req, res, next) => {
                             $push: {usersDisliked: user}//et on ajoute l'userId au tableau usersDisliked
                         }, {_id: req.params.id})
                         .then(() => res.status(200).json({message: 'Vote négatif !'}))
-                        .catch(error => res.status(400).json({error}))
+                        .catch(error => res.status(error.statusCode).json({error}))
                     }
                     else {
                         res.status(400).json({message: 'Vote déjà enregistré'})
@@ -131,14 +131,14 @@ exports.voteSauce = (req, res, next) => {
                             $pull: {usersLiked: user}//et on sort l'id du tableau usersLiked
                         }, {_id: req.params.id})
                         .then(() => res.status(200).json({message: 'Vote réinitialisé !'}))
-                        .catch(error => res.status(400).json({error}))
+                        .catch(error => res.status(error.statusCode).json({error}))
                     } else if (sauce.usersDisliked.includes(user)) {//et que usersDisliked contient l'userId
                         Sauce.updateOne({_id: req.params.id}, {
                             $inc: {dislikes: -1},//on retire 1 à dislikes
                             $pull: {usersDisliked: user}//et on sort l'id du tableau usersDisliked
                         } , {_id: req.params.id})
                         .then(() => res.status(200).json({message: 'avis retiré!'}))
-                        .catch(error => res.status(400).json({error}))
+                        .catch(error => res.status(error.statusCode).json({error}))
                     }
                 break;
                 default:
@@ -146,6 +146,6 @@ exports.voteSauce = (req, res, next) => {
             }
         }
     })
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(error.statusCode).json({ error }));
 };
 

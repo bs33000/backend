@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const MongooseErrors = require('mongoose-errors');
 
 //Vérifie que l'utilisateur n'est pas déjà enregistré dans la base
 const uniqueValidator = require('mongoose-unique-validator');
@@ -11,4 +12,5 @@ const userSchema = mongoose.Schema({
 
 userSchema.plugin(uniqueValidator);
 
+userSchema.plugin(MongooseErrors);
 module.exports = mongoose.model('User', userSchema);

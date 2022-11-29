@@ -1,4 +1,6 @@
 const multer = require('multer');
+const fs = require('fs');
+
 
 //Dictionnaire des types de fichiers image
 const MIME_TYPES = {
@@ -7,15 +9,21 @@ const MIME_TYPES = {
   'image/png': 'png'
 };
 
+// teste l'existence ou non du repertoire "images"
+const dir = './images';
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
+
 /** Crée un nom de fichier avec timestamp & enregistre via multer  */
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, 'images');
+    callback(null, dir);
   },
   filename: (req, file, callback) => {
-    const name = file.originalname.split(' ').join('_');
+    //const name = file.originalname.split(' ').join('_');
     const extension = MIME_TYPES[file.mimetype];
-    callback(null, name + Date.now() + '.' + extension);
+    callback(null, /*name +*/ Date.now() + '.' + extension);
   }
 });
 

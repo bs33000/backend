@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const MongooseErrors = require('mongoose-errors');
 
 //Définit le format des données sauce
 const sauceSchema = mongoose.Schema({
@@ -15,4 +16,5 @@ const sauceSchema = mongoose.Schema({
   usersDisliked: { type: Array, required: true, defaultValue: [] }
 })
 
+sauceSchema.plugin(MongooseErrors);
 module.exports = mongoose.model('Sauce', sauceSchema);
